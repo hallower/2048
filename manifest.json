@@ -1,0 +1,15 @@
+{
+    "name": "2048",
+    "description": "2048 by Gabriele Cirulli",
+    "url": "http://52.88.159.169/2048",
+    "icon": "http://52.88.159.169/2048/favicon.ico",
+    "public": false,
+    "start_alone": false,  
+    "auto_launch": false,
+    "one_off": false,
+    "developer": {
+        "name": "Gabriele Cirulli",
+        "dev_key": "0aq7JW3Yv0wF"   
+    }
+}
+
