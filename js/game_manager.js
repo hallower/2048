@@ -8,6 +8,7 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
 
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
+  this.inputManager.on("exit", this.exit.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
   this.setup();
@@ -18,6 +19,15 @@ GameManager.prototype.restart = function () {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
   this.setup();
+};
+
+// Exit the game with score sharing to friends
+GameManager.prototype.exit = function () {
+  $swap.sendText("My Best Score is " + this.storageManager.getBestScore());
+  setTimeout(function(){
+    $swap.sendWebApp();
+    $swap.finish();
+  }, 1000);  // This is temporary fix to send a message and a webapp.
 };
 
 // Keep playing after winning (allows going over 2048)

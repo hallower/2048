@@ -72,14 +72,14 @@
       </div>
     </div>
 
+    <div id="exit-win">
+      <hr>
+      <a class="exit-button">Share Best Score & Exit</a>
+    </div>
+
     <p class="game-explanation">
       <strong class="important">How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
     </p>
-    <hr>
-    <p>
-    <strong class="important">Note:</strong> This site is the official version of 2048. You can play it on your phone via <a href="#" onClick="$swap.popupUrl('http://git.io/2048');">http://git.io/2048.</a> All other apps or sites are derivatives or fakes, and should be used with caution.
-    </p>
-    <hr>
     <p>
     Created by <a href="#" onClick="$swap.popupUrl('http://gabrielecirulli.com');" target="_blank">Gabriele Cirulli.</a> Based on <a href="#" onClick="$swap.popupUrl('https://itunes.apple.com/us/app/1024!/id823499224');" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="#" onClick="$swap.popupUrl('http://asherv.com/threes/');" target="_blank">Threes by Asher Vollmer.</a>
     </p>
@@ -97,8 +97,17 @@
   <script src="js/game_manager.js"></script>
   <script src="js/application.js"></script>
   <script tpe="text/javascript">
+
+    var exit_button = document.getElementById("exit-win");
+    exit_button.style.display = "none";
+
     $swap.setRect(0, 0, 1, 1);
     $swap.setBackgroundColor("#00FFFFFF");
+    $swap.getInfo(function(info) {
+      if(info.isStarter){
+        exit_button.style.display = "block";
+      }
+    });
   </script>
 </body>
 </html>

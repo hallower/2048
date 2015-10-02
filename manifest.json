@@ -4,7 +4,7 @@
     "url": "http://52.88.159.169/2048",
     "icon": "http://52.88.159.169/2048/favicon.ico",
     "public": false,
-    "start_alone": false,  
+    "start_alone": true,  
     "auto_launch": false,
     "one_off": false,
     "developer": {

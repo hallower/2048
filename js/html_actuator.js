@@ -25,13 +25,6 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
     self.updateBestScore(metadata.bestScore);
 
     if (metadata.terminated) {
-
-      if(metadata.score >= metadata.bestScore)
-      {
-        console.log("My Best Score is " + metadata.score);
-        $swap.sendText("My Best Score is " + metadata.score);
-      }
-
       if (metadata.over) {
         self.message(false); // You lose
       } else if (metadata.won) {
