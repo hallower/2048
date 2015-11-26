@@ -37,6 +37,7 @@
         <div class="lower">
 	        <a class="keep-playing-button">Keep going</a>
           <a class="retry-button">Try again</a>
+          <a class="go-ranking-button">Go Ranking</a>
         </div>
       </div>
 
@@ -73,19 +74,64 @@
     </div>
 
     <div id="exit-win">
-      <hr>
+      <br>
       <a class="exit-button">Share Best Score & Exit</a>
     </div>
-
-    <p class="game-explanation">
-      <strong class="important">How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
-    </p>
+     
     <p>
     Created by <a href="#" onClick="$swap.popupUrl('http://gabrielecirulli.com');" target="_blank">Gabriele Cirulli.</a> Based on <a href="#" onClick="$swap.popupUrl('https://itunes.apple.com/us/app/1024!/id823499224');" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="#" onClick="$swap.popupUrl('http://asherv.com/threes/');" target="_blank">Threes by Asher Vollmer.</a>
     </p>
   </div>
 
-  <script type="text/javascript" src="http://swap.sec.net/lib/sec_swap_api.js"></script>
+  <script type="text/javascript" src="../lib/sec_swap_api.js"></script>
+  <script type="text/javascript" src="../lib/jquery-1.11.1.min.js"></script>
+  <script tpe="text/javascript">
+	var rankingManger;
+	var bestSyncManger = {
+		bLoaded:false,
+		bCbRegistered:false,
+		myBest:0,
+		cbFunction:function (){
+			alert("Sync Fail!");
+		}
+	};
+    var exit_button = document.getElementById("exit-win");
+    exit_button.style.display = "none";
+
+	function RankingManger(myID, myNick){
+		var self = this;
+		this.RANKING_PAGE_URL = "./ranking.html";
+		this.myID = myID;
+		this.nick = myNick;
+		this.myBest = 0;
+		
+		this.successGetID = function(data){
+			bestSyncManger.bLoaded = true;
+			bestSyncManger.myBest = self.myBest = data[0].score < 0 ? 0 : data[0].score;
+			console.log('successGetID');
+			console.log(bestSyncManger.cbFunction);
+			if(bestSyncManger.bCbRegistered)
+				bestSyncManger.cbFunction();
+		};
+	}
+	
+    $swap.setRect(0, 0, 1, 1);
+    $swap.setBackgroundColor("#00FFFFFF");
+    $swap.getInfo(function(info) {
+		var i;
+		if(info.isStarter){
+			exit_button.style.display = "block";
+		}
+
+		for(i=0; i<info.members.length; i++)
+		{
+			if(info.members[i].id == info.myID){
+				rankingManger = new RankingManger(info.myID, info.members[i].nick);
+			}
+		}
+		$swap.getRankingByIDs(rankingManger.myID, rankingManger.successGetID);
+    });
+  </script>
   <script src="js/bind_polyfill.js"></script>
   <script src="js/classlist_polyfill.js"></script>
   <script src="js/animframe_polyfill.js"></script>
@@ -96,18 +142,5 @@
   <script src="js/local_storage_manager.js"></script>
   <script src="js/game_manager.js"></script>
   <script src="js/application.js"></script>
-  <script tpe="text/javascript">
-
-    var exit_button = document.getElementById("exit-win");
-    exit_button.style.display = "none";
-
-    $swap.setRect(0, 0, 1, 1);
-    $swap.setBackgroundColor("#00FFFFFF");
-    $swap.getInfo(function(info) {
-      if(info.isStarter){
-        exit_button.style.display = "block";
-      }
-    });
-  </script>
 </body>
 </html>

@@ -11,8 +11,21 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
   this.inputManager.on("exit", this.exit.bind(this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
+  this.syncBestScore();
   this.setup();
 }
+
+// Sync Best Score with DB
+GameManager.prototype.syncBestScore = function () {
+  var self = this;
+  console.log('syncBestScore : ' + bestSyncManger.bLoaded);
+  if(bestSyncManger.bLoaded){
+    self.storageManager.setBestScore(bestSyncManger.myBest);
+  }else{
+	bestSyncManger.bCbRegistered = true;
+    bestSyncManger.cbFunction = function(){ self.syncBestScore(); };
+  }
+};
 
 // Restart the game
 GameManager.prototype.restart = function () {

@@ -29,7 +29,6 @@ function LocalStorageManager() {
 LocalStorageManager.prototype.localStorageSupported = function () {
   var testKey = "test";
   var storage = window.localStorage;
-
   try {
     storage.setItem(testKey, "1");
     storage.removeItem(testKey);
@@ -46,6 +45,8 @@ LocalStorageManager.prototype.getBestScore = function () {
 
 LocalStorageManager.prototype.setBestScore = function (score) {
   this.storage.setItem(this.bestScoreKey, score);
+  // Set to SWAP DB by SWAP Ranking API
+  $swap.putRanking(rankingManger.myID, rankingManger.nick, Number(score));
 };
 
 // Game state getters/setters and clearing
