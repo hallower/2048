@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>2048 Ranking Board</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<style>
+body {
+  margin: 0;
+  font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+  color: #776e65;
+  background: #faf8ef;
+}
+
+.main-header{
+  width: 100%;
+  margin-top: 30px;
+}
+
+.header-title{
+  text-align:left;
+  line-height:40px;
+  font-size:25px;
+  font-weight:bold;
+  margin-left: 20px;
+}
+
+#change-list{
+  text-align: right;
+  margin-right: 20px;
+  margin-top: 20px;
+  color: #da0b0b;
+}
+
+#change-list img{
+  height: 23px;
+  vertical-align: top;
+}
+
+#list-change-btn{
+  line-height: 25px;
+  display: inline-block;
+}
+
+.ranking-list{
+  list-style: none;
+  margin: 0 20px;
+  padding: 0;
+}
+
+.ranking-list li{
+  display: inline-block;
+  width: 100%;
+  padding: 5px 0;
+  margin: 2px 0;
+  clear: both;
+  line-height: 40px; 
+}
+
+.ranking-list li:nth-child(odd){
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+.ranking-list img{
+  width: 40px;
+  height: 40px;
+  float: left;
+  margin-right: 20px;
+}
+
+.num_rank{
+  display: inline-block;
+  float: left;
+  width: 10%;
+  color: #007aff;
+  text-align: center;
+}
+
+.ranking-nick{
+  display: block;
+  width: 65%;
+  color: #000;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  float: left;
+}  
+
+.num_score{
+  width: 25%;
+  color: #555;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  float: left;
+}
+
+#ranking-list-total{
+  display: none;
+}
+
+.first-comment{
+  font-size: 20px;
+  text-align: center;
+  margin-top: 30px;
+}
+
+
+</style>
+<body>
+	<header class="main-header">
+		<div class="header-title">
+			2048 Ranking
+		</div>
+	</header>
+	<section class="main-section">
+		<div id="change-list">
+			<img src="./go.png"><span id="list-change-btn">GO TOTAL RANKING</span>
+		</div>
+		<ol id="ranking-list-total" class="ranking-list">
+			<!-- Sample
+			<div class="first-comment">No one is in TOP 100, now.</div>
+			<li>
+				<em class="num_rank">1</em>
+				<span class="ranking-nick">delisalt</span>
+				<span class="num_score">100</span>
+			</li>
+			-->
+		</ol>
+		<ol id="ranking-list-chatroom" class="ranking-list">
+			<!-- Sample
+			<li>
+				<em class="num_rank">1</em>
+				<img scr="...">
+				<span class="ranking-nick">delisalt</span>
+				<span class="num_score">100</span>
+			</li>
+			-->
+		</ol>
+	</section>
+</body>
+<script type="text/javascript" src='../../../lib/sec_swap_api.js'></script>
+<script type="text/javascript" src='../../../lib/jquery-1.11.1.min.js'></script>
+<script>
+	var mainList;
+	
+	$( document ).ready(function() {
+		$swap.getInfo(function(info) {
+			mainList = new RankingList(info, "ranking-list-chatroom", "ranking-list-total", "list-change-btn");
+			$swap.setRect(0, 0, 1, 1);
+		    $('#list-change-btn').on("click",mainList.toggle);
+		});
+
+		window.addEventListener('resize', function (){ $swap.setRect(0, 0, 1, 1); }, false);
+		
+		$swap.onBackKey(function(){ history.back() });
+	});
+	
+	function RankingList(info, chatroomListID, totalListID, buttonID){
+		var self = this;
+		this.cid = chatroomListID;
+		this.tid = totalListID;
+		this.bid = buttonID;
+		this.info = info;
+		this.imgMap = {};
+		this.nickMap = {};
+		this.bOnRefreshing = false; // prevent event bubble.
+		this.now = 0; // 0: chatroom List, 1:total List
+		this.chatroomIDs = new Array();
+		var i;
+		
+		for(i=0 ;  i<info.members.length ; i++){
+			this.chatroomIDs.push(info.members[i].id);
+			this.imgMap[info.members[i].id] = info.members[i].img;
+			this.nickMap[info.members[i].id] = info.members[i].nick;
+		}
+
+		this.fillTotalList = function (data){
+			var str0 = "<li><em class=\"num_rank\">";
+			var str1 = "</em><span class=\"ranking-nick\">";
+			var str2 = "</span><span class=\"num_score\">";
+			var str3 = "</span></li>";
+			var tmp = "";
+			var i;
+
+			self.bOnRefreshing = false;
+			
+			if(data.length == 0){
+				tmp += "<div class=\"first-comment\">No one is in TOP 100, now.</div>";
+			}else{
+				for(i=0 ; i<data.length ; i++){
+					tmp += str0 + data[i].ranking + str1 + data[i].nick + str2 + data[i].score + str3;
+				}
+			}
+			
+			$('#'+self.tid).html(tmp);
+		};
+
+		this.fillChatroomList = function (data){
+			var str0 = "<li><em class=\"num_rank\">"; // + ranking
+			var str1 = "</em><span class=\"ranking-nick\"><img src=\""; // + profile src
+			var str2 = "\">"; // + nick
+			var str3 = "</span><span class=\"num_score\">"; // + score
+			var str4 = "</span></li>";
+			var tmp = "";
+			var tmpRank = 0;
+			var i;
+
+			self.bOnRefreshing = false;
+			test = data;
+			data.sort(function(a, b){
+				return b.score - a.score;
+			});
+
+			for(i=0 ; i<data.length ; i++){
+				if(data[i].score == -1){
+					if(i == 0 || data[i-1].score > data[i].score)
+						tmpRank = i+1;
+
+					tmp += str0 + tmpRank + str1 + self.imgMap[data[i].id] + str2 + self.nickMap[data[i].id] + str3 + '-' + str4;
+				}else{
+					if(i == 0 || data[i-1].score > data[i].score)
+						tmpRank = i+1;
+						
+					tmp += str0 + tmpRank + str1 + self.imgMap[data[i].id] + str2 + data[i].nick + str3 + data[i].score + str4;
+				}
+			}
+			$('#'+self.cid).html(tmp);
+		};
+
+		this.refresh = function refreshList(){
+
+			if(self.bOnRefreshing === true)
+				return;
+				
+			self.bOnRefreshing = true;
+			
+			if(self.now === 0){
+				$swap.getRankingByIDs(self.chatroomIDs, self.fillChatroomList);
+			}else{
+				$swap.getRanking(100, self.fillTotalList);
+			}
+		};
+		
+		this.toggle = function hide(){	//toggle list
+			if(self.now === 0){
+				self.now = 1;
+				self.refresh();
+				$('#'+self.cid).hide();
+				$('#'+self.tid).show();
+				$('#'+self.bid).text('GO CHATROOM RANKING');
+			}else{
+				self.now = 0;
+				self.refresh();
+				$('#'+self.cid).show();
+				$('#'+self.tid).hide();
+				$('#'+self.bid).text('GO TOTAL RANKING');
+			}
+		};
+
+		this.refresh(); //init
+	}
+</script>
+</html>
